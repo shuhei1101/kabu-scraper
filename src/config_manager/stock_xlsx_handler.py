@@ -48,16 +48,19 @@ class StockXlsxHandler:
         key_col_idx = headers.index(self.key) + 1  # Excel列は1始まり
 
         # 該当行を探して更新
-        for row in ws.iter_rows(min_row=2, values_only=False):
+        for row in ws.iter_rows(min_row=2):
             cell = row[key_col_idx - 1]
             if str(cell.value) == str(updated_record[self.key]):
                 for idx, header in enumerate(headers):
-                    row[idx].value = updated_record[header]
+                    if header in updated_record:
+                        row[idx].value = updated_record[header]
                 break
         else:
             raise ValueError(f"コード '{updated_record[self.key]}' のレコードが存在しません。")
 
+        # 書式を維持したまま保存
         wb.save(self.xlsx_path)
+        wb.close()
 
 # 動作確認用
 if __name__ == "__main__":

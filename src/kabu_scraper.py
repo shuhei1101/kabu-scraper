@@ -35,7 +35,7 @@ class KabuScraper:
                 result = table.xpath('.//tr')[2].xpath('.//td')[0].text_content().strip()
                 # result = None
 
-            elif target == '配当金(円／一株)':
+            elif target == '配当金(円／株)':
                 url = f"https://kabutan.jp/stock/?code={self.stock_code}"
                 xpath = '//*[@id="kobetsu_right"]/div[3]/table[1]/tbody/tr[3]/td[5]'
                 td = self._get_data(url, xpath)[0]
@@ -49,7 +49,7 @@ class KabuScraper:
                 result = h3.text_content().strip()
                 # result = None
 
-            elif target == '時価総額(億円)':
+            elif target == '時価総額':
                 url = f"https://kabutan.jp/stock/?code={self.stock_code}"
                 soup = self._get_soup(url)
                 result = soup.find(id='stockinfo_i3').find_all('table')[0].find_all('tbody')[0].find_all('tr')[1].find_all('td')[0].text
