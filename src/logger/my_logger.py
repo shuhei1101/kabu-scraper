@@ -1,9 +1,12 @@
 import logging
+from logging.handlers import TimedRotatingFileHandler
 import os
 
 src_dir = os.path.dirname(__file__)
 project_root = os.path.dirname(src_dir)
 log_dir = os.path.join(project_root, 'log')
+
+LOG_LEVEL = logging.DEBUG
 
 
 # logger
@@ -27,17 +30,17 @@ class MyLogger:
 
         # ロガーの設定
         self.logger = logging.getLogger('MyLogger')
-        self.logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        self.logger.setLevel(LOG_LEVEL)
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
 
         # コンソール出力の設定
-        # ch = logging.StreamHandler()
-        # ch.setLevel(logging.DEBUG)
-        # ch.setFormatter(formatter)
-        # self.logger.addHandler(ch)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        ch.setFormatter(formatter)
+        self.logger.addHandler(ch)
 
         # ファイル出力の設定
-        fh = logging.FileHandler(log_file_path)
+        fh = TimedRotatingFileHandler(log_file_path, when="midnight", interval=1, backupCount=7)
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
