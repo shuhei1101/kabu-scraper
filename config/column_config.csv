@@ -1,0 +1,3 @@
+is_enable,column,url,xpath
+0,株価(円),https://kabutan.jp/stock/?code={stock_code},//*[@id='kobetsu_left']/table[1]/tbody/tr[4]/td[1]
+1,銘柄,https://kabutan.jp/stock/?code={stock_code},//*[@id="stockinfo_i1"]/div[1]/h2/text()
