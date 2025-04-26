@@ -10,9 +10,46 @@ sys.path.append(config_dir)
 
 import config
 from config_manager.stock_xlsx_handler import StockXlsxHandler
-from util.reader import dialog_message, get_path_with_dialog
+from util.reader import get_path_with_dialog
 from logger.my_logger import MyLogger
 from kabu_scraper import KabuScraper
+
+async def main():
+    """メイン関数"""
+    try:
+        print("\n" * 3)
+        MyLogger().info(f"KabuScraper を実行")
+
+        xlsx_path = config.XLSX_PATH
+        if not os.path.exists(xlsx_path):
+            print(f"`{config.XLSX_PATH}`にファイルが存在しません。ファイルダイアログを開きます。")
+            xlsx_path = get_path_with_dialog()
+
+        if not xlsx_path:
+            MyLogger().info("ファイルが選択されませんでした。処理を終了します。")
+            return
+        
+        MyLogger().info(f"選択されたファイル: {xlsx_path}")
+
+        handler = StockXlsxHandler(
+            xlsx_path=xlsx_path,
+            key=config.STOCK_CODE_COLUMN,
+        )
+        stock_codes = handler.get_key_data()
+
+        tasks = [
+            process_stock_code(stock_code, handler)
+            for stock_code in stock_codes
+        ]
+        await asyncio.gather(*tasks)
+
+        MyLogger().info("KabuScraper の実行が完了")
+
+    except Exception as e:
+        print(f"不明なエラーが発生しました。処理を終了します。")
+        print("\n" * 3)
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        MyLogger().critical(traceback_to_json(exc_type, exc_value, exc_tb))
 
 async def process_stock_code(stock_code, handler):
     """銘柄コードを非同期で処理"""
@@ -47,37 +84,6 @@ async def process_stock_code(stock_code, handler):
         handler.update_record(record)
     except ValueError as e:
         MyLogger().debug(e)
-
-async def main():
-    """メイン関数"""
-    try:
-        xlsx_path = get_path_with_dialog()
-
-        if not xlsx_path:
-            MyLogger().info("ファイルが選択されませんでした。処理を終了します。")
-            return
-
-        handler = StockXlsxHandler(
-            xlsx_path=xlsx_path,
-            key=config.STOCK_CODE_COLUMN,
-        )
-        stock_codes = handler.get_key_data()
-
-        print("\n" * 3)
-        MyLogger().info(f"KabuScraper を実行")
-
-        tasks = [
-            process_stock_code(stock_code, handler)
-            for stock_code in stock_codes
-        ]
-        await asyncio.gather(*tasks)
-
-        MyLogger().info("KabuScraper の実行が完了")
-        dialog_message("KabuScraper の実行が完了")
-
-    except Exception as e:
-        exc_type, exc_value, exc_tb = sys.exc_info()
-        MyLogger().critical(traceback_to_json(exc_type, exc_value, exc_tb))
 
 def traceback_to_json(exc_type, exc_value, exc_tb):
     """スタックトレースをjson形式に変換する"""

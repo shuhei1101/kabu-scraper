@@ -8,7 +8,6 @@ log_dir = os.path.join(project_root, 'log')
 
 LOG_LEVEL = logging.DEBUG
 
-
 # logger
 class MyLogger:
     '''シングルトンでロガーを管理するクラス'''
