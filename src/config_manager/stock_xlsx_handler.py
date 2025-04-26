@@ -1,4 +1,5 @@
 import pandas as pd
+from openpyxl import load_workbook
 
 class StockXlsxHandler:
     '''stock_table.xlsx を操作するクラス'''
@@ -22,13 +23,11 @@ class StockXlsxHandler:
             raise ValueError(f"コード '{key}' のレコードが見つかりません。")
         record = match.iloc[0]
         return record
-    
+
     def get_key_data(self):
         '''キーのデータを取得'''
-        if self.key not in self.df.columns:
-            raise ValueError(f"キー '{self.key}' は存在しません。")
         return self.df[self.key].tolist()
-    
+
     def get_column_data(self, column_name: str):
         '''指定したカラムのデータを取得'''
         if column_name not in self.df.columns:
@@ -36,23 +35,40 @@ class StockXlsxHandler:
         return self.df[column_name].tolist()
 
     def update_record(self, updated_record: pd.Series):
-        '''レコードを渡して一行更新'''
-        idx = self.df[self.df[self.key].astype(str) == str(updated_record[self.key])].index
-        if idx.empty:
+        '''レコードを渡して一行更新（書式維持）'''
+        # Excelファイルをロード
+        wb = load_workbook(self.xlsx_path)
+        ws = wb.active
+
+        # ヘッダー読み取り
+        headers = [cell.value for cell in ws[1]]
+        if self.key not in headers:
+            raise ValueError(f"キー '{self.key}' はシートに存在しません。")
+
+        key_col_idx = headers.index(self.key) + 1  # Excel列は1始まり
+
+        # 該当行を探して更新
+        for row in ws.iter_rows(min_row=2, values_only=False):
+            cell = row[key_col_idx - 1]
+            if str(cell.value) == str(updated_record[self.key]):
+                for idx, header in enumerate(headers):
+                    row[idx].value = updated_record[header]
+                break
+        else:
             raise ValueError(f"コード '{updated_record[self.key]}' のレコードが存在しません。")
-        self.df.loc[idx[0]] = updated_record
-        self.df.to_excel(self.xlsx_path, index=False, engine='openpyxl')
+
+        wb.save(self.xlsx_path)
 
 # 動作確認用
 if __name__ == "__main__":
     handler = StockXlsxHandler(
         xlsx_path='input/配当管理.xlsx',
-        key='銘柄コード'  # 銘柄コードをキーに指定
+        key='銘柄コード'
     )
     try:
         record = handler.get_record('2801')
         print("取得したレコード:", record)
-        
+
         stock_codes = handler.get_key_data()
         print("銘柄コードのリスト:", stock_codes)
 
