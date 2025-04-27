@@ -2,12 +2,14 @@ import requests
 from lxml import html
 from bs4 import BeautifulSoup
 
+from util.converter import to_unit_billion
+
 # XPathで値を抽出するスクレイパークラス
 class KabuScraper:
+    cache = {}  # URLとレスポンスをキャッシュする辞書
 
     def __init__(self, stock_code):
         self.stock_code = stock_code
-        self.cache = {}  # URLとレスポンスをキャッシュする辞書
 
     def scrape(self, target):
         """対象を指定して値を取得"""
@@ -47,7 +49,8 @@ class KabuScraper:
             elif target == '時価総額':
                 url = f"https://kabutan.jp/stock/?code={self.stock_code}"
                 soup = self._get_soup(url)
-                result = soup.find(id='stockinfo_i3').find_all('table')[0].find_all('tbody')[0].find_all('tr')[1].find_all('td')[0].text
+                raw_value = soup.find(id='stockinfo_i3').find_all('table')[0].find_all('tbody')[0].find_all('tr')[1].find_all('td')[0].text
+                result = to_unit_billion(raw_value)
 
             else:
                 raise ValueError(f"モジュール'KabuScraper'に'{target}'の設定がありません。")
@@ -70,21 +73,24 @@ class KabuScraper:
         return BeautifulSoup(response.content, 'html.parser')
     
     def _get_response(self, url):
-        """URLに対するレスポンスをキャッシュから取得または新規取得する"""
-        if url in self.cache:
-            return self.cache[url]
+        if url in KabuScraper.cache:
+            return KabuScraper.cache[url]
         response = requests.get(url)
         if response.status_code != 200:
-            raise ValueError(f"Failed to load page: {url}")
+            raise ValueError(f"URL '{url}' にアクセスできません。ステータスコード: {response.status_code}")
+        KabuScraper.cache[url] = response
         self.cache[url] = response
         return response
     
 
 # 動作確認用
 if __name__ == "__main__":
-    scraper = KabuScraper(stock_code="4042")
+    scraper1 = KabuScraper(stock_code="4042")
+    scraper2 = KabuScraper(stock_code="4042")
     try:
-        result = scraper.scrape('銘柄')
+        result = scraper1.scrape('時価総額')
+        print(result)
+        result = scraper2.scrape('時価総額')
         print(result)
     except ValueError as e:
         print(e)
