@@ -2,7 +2,7 @@ import requests
 from lxml import html
 from bs4 import BeautifulSoup
 
-from util.converter import str_to_int, to_unit_billion
+from util.converter import str_to_int
 
 # XPathで値を抽出するスクレイパークラス
 class KabuScraper:
@@ -10,6 +10,9 @@ class KabuScraper:
 
     def __init__(self, stock_code):
         self.stock_code = stock_code
+        self._register_cache(f"https://kabutan.jp/stock/?code={self.stock_code}")
+        self._register_cache(f"https://minkabu.jp/stock/{self.stock_code}/dividend")
+        self._register_cache(f"https://minkabu.jp/stock/{self.stock_code}/yutai")
 
     def scrape(self, target):
         """対象を指定して値を取得"""
@@ -81,6 +84,14 @@ class KabuScraper:
         KabuScraper.cache[url] = response
         self.cache[url] = response
         return response
+    
+    def _register_cache(self, url):
+        """URLからレスポンスをキャッシュに登録する"""
+        if url not in KabuScraper.cache:
+            response = requests.get(url)
+            if response.status_code != 200:
+                raise ValueError(f"URL '{url}' にアクセスできません。ステータスコード: {response.status_code}")
+            KabuScraper.cache[url] = response
     
 
 # 動作確認用

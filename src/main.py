@@ -51,7 +51,7 @@ async def main():
     
     print("\n" * 3)
 
-async def process_stock_code(stock_code, handler):
+async def process_stock_code(stock_code, handler: StockXlsxHandler):
     """銘柄コードを非同期で処理"""
     scraper = KabuScraper(stock_code)
     record = handler.get_record(key=stock_code)
