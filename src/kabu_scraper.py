@@ -2,7 +2,7 @@ import requests
 from lxml import html
 from bs4 import BeautifulSoup
 
-from util.converter import to_unit_billion
+from util.converter import str_to_int, to_unit_billion
 
 # XPathで値を抽出するスクレイパークラス
 class KabuScraper:
@@ -50,7 +50,7 @@ class KabuScraper:
                 url = f"https://kabutan.jp/stock/?code={self.stock_code}"
                 soup = self._get_soup(url)
                 raw_value = soup.find(id='stockinfo_i3').find_all('table')[0].find_all('tbody')[0].find_all('tr')[1].find_all('td')[0].text
-                result = to_unit_billion(raw_value)
+                result = str_to_int(raw_value)
 
             else:
                 raise ValueError(f"モジュール'KabuScraper'に'{target}'の設定がありません。")
