@@ -25,7 +25,8 @@ async def main():
             print("処理を終了します。")
             return
 
-        MyLogger().info(f"選択されたファイル: {xlsx_path}")
+        print(f"選択されたファイル: {xlsx_path}")
+        
 
         handler = StockXlsxHandler(
             xlsx_path=xlsx_path,
@@ -37,15 +38,18 @@ async def main():
             process_stock_code(stock_code, handler)
             for stock_code in stock_codes
         ]
+        print(f"スクレイピング中...")
         await asyncio.gather(*tasks)
 
         MyLogger().info("KabuScraper の実行が完了")
+        
 
     except Exception as e:
         print(f"不明なエラーが発生しました。処理を終了します。")
-        print("\n" * 3)
         exc_type, exc_value, exc_tb = sys.exc_info()
         MyLogger().critical(traceback_to_json(exc_type, exc_value, exc_tb))
+    
+    print("\n" * 3)
 
 async def process_stock_code(stock_code, handler):
     """銘柄コードを非同期で処理"""

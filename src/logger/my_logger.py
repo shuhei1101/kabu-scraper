@@ -2,7 +2,8 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
 
-src_dir = os.path.dirname(__file__)
+logger_dir = os.path.dirname(__file__)
+src_dir = os.path.dirname(logger_dir)
 project_root = os.path.dirname(src_dir)
 log_dir = os.path.join(project_root, 'log')
 
