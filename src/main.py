@@ -10,7 +10,6 @@ sys.path.append(config_dir)
 
 import config
 from config_manager.stock_xlsx_handler import StockXlsxHandler
-from util.reader import get_path_with_dialog
 from logger.my_logger import MyLogger
 from kabu_scraper import KabuScraper
 
@@ -22,13 +21,10 @@ async def main():
 
         xlsx_path = config.XLSX_PATH
         if not os.path.exists(xlsx_path):
-            print(f"`{config.XLSX_PATH}`にファイルが存在しません。ファイルダイアログを開きます。")
-            xlsx_path = get_path_with_dialog()
-
-        if not xlsx_path:
-            MyLogger().info("ファイルが選択されませんでした。処理を終了します。")
+            print(f"`{config.XLSX_PATH}`にファイルが存在しません。config/config.pyを確認してください。")
+            print("処理を終了します。")
             return
-        
+
         MyLogger().info(f"選択されたファイル: {xlsx_path}")
 
         handler = StockXlsxHandler(
