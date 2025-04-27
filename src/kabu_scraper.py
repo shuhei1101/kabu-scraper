@@ -85,7 +85,7 @@ class KabuScraper:
 
 # 動作確認用
 if __name__ == "__main__":
-    scraper1 = KabuScraper(stock_code="4042")
+    scraper1 = KabuScraper(stock_code="4040")
     scraper2 = KabuScraper(stock_code="4042")
     try:
         result = scraper1.scrape('時価総額')
