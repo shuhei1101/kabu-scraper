@@ -39,10 +39,12 @@ class KabuScraper:
                 result = table.xpath('.//tr')[2].xpath('.//td')[0].text_content().strip()
 
             elif target == '配当金(円／株)':
-                url = f"https://kabutan.jp/stock/?code={self.stock_code}"
-                xpath = '//*[@id="kobetsu_right"]/div[3]/table[1]/tbody/tr[3]/td[5]'
-                td = self._get_data(url, xpath)[0]
-                raw_value = td.text_content().strip()
+                url = f"https://minkabu.jp/stock/{self.stock_code}/dividend"
+                xpath1 = '//*[@id="contents"]/div[3]/section[1]/div[2]/div/div[2]/div/div[1]/div/span[1]'
+                xpath2 = '//*[@id="contents"]/div[3]/section[1]/div[2]/div/div[2]/div/div[1]/div/span[2]'
+                real_value = self._get_data(url, xpath1)[0].text_content().strip()
+                decimal_value = self._get_data(url, xpath2)[0].text_content().strip()
+                raw_value = f"{real_value}{decimal_value}"
                 result = str_to_float(raw_value)
 
             elif target == '株主優待':
