@@ -14,10 +14,11 @@ from config_manager.stock_xlsx_handler import StockXlsxHandler
 from logger.my_logger import MyLogger
 from kabu_scraper import KabuScraper
 
-done_cnt = 0
 
 async def main():
     """メイン関数"""
+    done_cnt = 0
+
     start_time = time.time()  # 開始時刻を記録
     try:
         print("\n" * 3)
@@ -38,13 +39,15 @@ async def main():
         )
         stock_codes = handler.get_key_data()
 
+        done_cnt = len(stock_codes)
+
         tasks = [
-            process_stock_code(stock_code, handler)
+            process_stock_code(done_cnt, stock_code, handler)
             for stock_code in stock_codes
         ]
         await asyncio.gather(*tasks)
 
-    except Exception as e:
+    except Exception:
         MyLogger().info(f"不明なエラーが発生しました。処理を終了します。")
         exc_type, exc_value, exc_tb = sys.exc_info()
         MyLogger().critical(traceback_to_json(exc_type, exc_value, exc_tb))
@@ -57,19 +60,20 @@ async def main():
         print()
         MyLogger().info(f"処理株数: {done_cnt}")
         MyLogger().info(f"合計処理時間: {elapsed_time:.2f} 秒")
+        MyLogger().info(f"1株あたりの平均処理時間: {elapsed_time / done_cnt:.2f} 秒")
 
     print("\n" * 3)
 
-async def process_stock_code(stock_code, handler: StockXlsxHandler):
+async def process_stock_code(done_cnt, stock_code, handler: StockXlsxHandler):
     """銘柄コードを非同期で処理"""
     record = handler.get_record(key=stock_code)
 
     is_update = record["更新不要"] == None
     if not is_update:   
         MyLogger().debug(f"銘柄コード '{stock_code}' は更新不要なため、スキップします。")
+        done_cnt -= 1
         return
     else:
-        done_cnt += 1
         MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングを開始します。")
 
     scraper = KabuScraper(stock_code)
