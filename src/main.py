@@ -36,10 +36,10 @@ async def main():
             key=config.STOCK_CODE_COLUMN,
         )
         stock_codes = handler.get_key_data()
-
         tasks = [
             process_stock_code(stock_code, handler)
             for stock_code in stock_codes
+            if isinstance(stock_code, int)
         ]
         await asyncio.gather(*tasks)
 
@@ -59,26 +59,31 @@ async def main():
 
 async def process_stock_code(stock_code, handler: StockXlsxHandler):
     """銘柄コードを非同期で処理"""
-    record = handler.get_record(key=stock_code)
+    try:
+        record = handler.get_record(key=stock_code)
 
-    is_update = record["更新"] != None
-    if not is_update:   
-        MyLogger().debug(f"銘柄コード '{stock_code}' は更新不要なため、スキップします。")
-        return
-    else:
-        MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングを開始します。")
+        is_update = record["更新"] != None
+        if not is_update:   
+            MyLogger().debug(f"銘柄コード '{stock_code}' は更新不要なため、スキップします。")
+            return
+        else:
+            MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングを開始します。")
 
-    scraper = KabuScraper(stock_code)
+        scraper = KabuScraper(stock_code)
 
-    tasks = [process_column(column, stock_code, scraper) for column in record.index]
-    results = await asyncio.gather(*tasks)
+        tasks = [process_column(column, stock_code, scraper) for column in record.index]
+        results = await asyncio.gather(*tasks)
 
-    for column, value in results:
-        if value is not None:
-            record[column] = value
-    
-    handler.update_record(record)
-    MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングが完了しました。")
+        for column, value in results:
+            if value is not None:
+                record[column] = value
+        
+        handler.update_record(record)
+        MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングが完了しました。")
+    except Exception:
+        MyLogger().info(f"不明なエラーが発生しました。")
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        MyLogger().critical(traceback_to_json(exc_type, exc_value, exc_tb))
 
 async def process_column(column, stock_code, scraper: KabuScraper):
     """銘柄コードの各列を非同期で処理"""
