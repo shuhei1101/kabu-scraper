@@ -55,7 +55,7 @@ async def process_stock_code(stock_code, handler: StockXlsxHandler):
     record = handler.get_record(key=stock_code)
 
     is_update = record["更新不要"] == ""
-    if not is_update:
+    if not is_update:   
         MyLogger().debug(f"銘柄コード '{stock_code}' は更新不要なため、スキップします。")
         return
     else:

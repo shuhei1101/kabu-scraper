@@ -22,6 +22,7 @@ class StockXlsxHandler:
         if match.empty:
             raise ValueError(f"コード '{key}' のレコードが見つかりません。")
         record = match.iloc[0]
+        record = record.where(pd.notnull(record), "")
         return record
 
     def get_key_data(self):
