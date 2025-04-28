@@ -2,6 +2,7 @@ import os
 import sys
 import traceback
 import asyncio
+import time  # 実行時間計測用
 
 src_dir = os.path.dirname(__file__)
 project_root = os.path.dirname(src_dir)
@@ -15,6 +16,7 @@ from kabu_scraper import KabuScraper
 
 async def main():
     """メイン関数"""
+    start_time = time.time()  # 開始時刻を記録
     try:
         print("\n" * 3)
         MyLogger().info(f"KabuScraper を実行")
@@ -48,6 +50,11 @@ async def main():
         exc_type, exc_value, exc_tb = sys.exc_info()
         MyLogger().critical(traceback_to_json(exc_type, exc_value, exc_tb))
     
+    finally:
+        end_time = time.time()  # 終了時刻を記録
+        elapsed_time = end_time - start_time
+        MyLogger().info(f"処理時間: {elapsed_time:.2f} 秒")  # 実行時間をログに記録
+
     print("\n" * 3)
 
 async def process_stock_code(stock_code, handler: StockXlsxHandler):
