@@ -22,7 +22,7 @@ class StockXlsxHandler:
         if match.empty:
             raise ValueError(f"コード '{key}' のレコードが見つかりません。")
         record = match.iloc[0]
-        record = record.where(pd.notnull(record), "")
+        record = record.where(pd.notnull(record), None)
         return record
 
     def get_key_data(self):
@@ -38,7 +38,7 @@ class StockXlsxHandler:
     def update_record(self, updated_record: pd.Series):
         '''レコードを渡して一行更新（書式維持）'''
         # Excelファイルをロード
-        wb = load_workbook(self.xlsx_path)
+        wb = load_workbook(self.xlsx_path, data_only=False)
         ws = wb.active
 
         # ヘッダー読み取り
@@ -54,7 +54,10 @@ class StockXlsxHandler:
             if str(cell.value) == str(updated_record[self.key]):
                 for idx, header in enumerate(headers):
                     if header in updated_record:
-                        row[idx].value = updated_record[header]
+                        target_cell = row[idx]
+                        # 元々関数なら上書きしない
+                        if not (target_cell.data_type == 'f'):  # 'f'はformulaの略
+                            target_cell.value = updated_record[header]
                 break
         else:
             raise ValueError(f"コード '{updated_record[self.key]}' のレコードが存在しません。")

@@ -55,8 +55,9 @@ async def main():
         MyLogger().info("KabuScraper の実行が完了")
         end_time = time.time()  # 終了時刻を記録
         elapsed_time = end_time - start_time
+        print()
+        MyLogger().info(f"処理株数: {len(stock_codes)}")
         MyLogger().info(f"合計処理時間: {elapsed_time:.2f} 秒")
-        MyLogger().info(f"処理行数: {len(stock_codes)}")
         MyLogger().info(f"平均処理時間: {elapsed_time / len(stock_codes):.2f} 秒")
 
     print("\n" * 3)
@@ -65,7 +66,7 @@ async def process_stock_code(stock_code, handler: StockXlsxHandler):
     """銘柄コードを非同期で処理"""
     record = handler.get_record(key=stock_code)
 
-    is_update = record["更新不要"] == ""
+    is_update = record["更新不要"] == None
     if not is_update:   
         MyLogger().debug(f"銘柄コード '{stock_code}' は更新不要なため、スキップします。")
         return
@@ -80,8 +81,8 @@ async def process_stock_code(stock_code, handler: StockXlsxHandler):
     for column, value in results:
         if value is not None:
             record[column] = value
-            handler.update_record(record)
     
+    handler.update_record(record)
     MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングが完了しました。")
 
 async def process_column(column, stock_code, scraper: KabuScraper):
