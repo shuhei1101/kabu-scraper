@@ -76,13 +76,9 @@ async def process_stock_code(stock_code, handler: StockXlsxHandler):
     for column, value in results:
         if value is not None:
             record[column] = value
+            handler.update_record(record)
     
     MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングが完了しました。")
-
-    try:
-        handler.update_record(record)
-    except ValueError as e:
-        MyLogger().debug(e)
 
 async def process_column(column, stock_code, scraper: KabuScraper):
     """銘柄コードの各列を非同期で処理"""
@@ -90,6 +86,7 @@ async def process_column(column, stock_code, scraper: KabuScraper):
         MyLogger().debug(f"銘柄コード '{stock_code}' の '{column}' をスクレイピング中...")
         value = await asyncio.to_thread(scraper.scrape, column)
     except ValueError as e:
+        # 設定がない場合はスキップ
         MyLogger().debug(e)
         return column, None
     except Exception as e:
