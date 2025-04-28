@@ -53,11 +53,14 @@ async def main():
 
 async def process_stock_code(stock_code, handler: StockXlsxHandler):
     """銘柄コードを非同期で処理"""
+    MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングを開始します。")
+
     scraper = KabuScraper(stock_code)
     record = handler.get_record(key=stock_code)
 
     async def process_column(column):
         try:
+            MyLogger().debug(f"銘柄コード '{stock_code}' の '{column}' をスクレイピング中...")
             value = await asyncio.to_thread(scraper.scrape, column)
         except ValueError as e:
             MyLogger().debug(e)
@@ -79,6 +82,8 @@ async def process_stock_code(stock_code, handler: StockXlsxHandler):
     for column, value in results:
         if value is not None:
             record[column] = value
+    
+    MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングが完了しました。")
 
     try:
         handler.update_record(record)
