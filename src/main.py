@@ -57,7 +57,6 @@ async def main():
         print()
         MyLogger().info(f"処理株数: {done_cnt}")
         MyLogger().info(f"合計処理時間: {elapsed_time:.2f} 秒")
-        MyLogger().info(f"平均処理時間: {elapsed_time / done_cnt:.2f} 秒")
 
     print("\n" * 3)
 
