@@ -19,20 +19,35 @@ def to_unit_billion(value: str) -> str:
     total_billion = trillion + billion
     return f"{total_billion}億円"
 
-def str_to_int(s: str) -> int:
+def str_to_bilion(s: str) -> float:
     '''◯兆◯億円"や"◯億円"を数値型に変換 (小数点以下にも対応)'''
-    s = s.replace(",", "")  # カンマを削除
-    trillion, billion = 0, 0
-    if "兆" in s:
-        parts = s.split("兆")
-        trillion = float(parts[0]) * 1000000000000
-        if "億" in parts[1]:
-            billion = float(parts[1].replace("億円", "")) * 100000000
-    elif "億" in s:
-        billion = float(s.replace("億円", "")) * 100000000
-    
-    return int(trillion + billion)
+    try:
+        s = s.replace(",", "")  # カンマを削除
+        trillion, billion = 0, 0
+        if "兆" in s:
+            parts = s.split("兆")
+            trillion = float(parts[0]) * 1000000000000
+            if "億" in parts[1]:
+                billion = float(parts[1].replace("億円", "")) * 100000000
+        elif "億" in s:
+            billion = float(s.replace("億円", "")) * 100000000
+        
+        return float(trillion + billion)
+    except ValueError:
+        # 変換できない場合は0.0を返す
+        return 0.0
 
+def str_to_float(s: str) -> float:
+    '''数値をfloat型に変換
+    
+    例: "1,234.56" → 1234.56
+    例: "1,234" → 1234.0
+    例: "ー" → 0.0
+    '''
+    try:
+        return float(s.replace(",", ""))
+    except ValueError:
+        return 0.0
 
 # 動作確認用
 if __name__ == "__main__":
@@ -42,4 +57,4 @@ if __name__ == "__main__":
         "12兆1234.1億円",
     ]
     for value in test_values:
-        print(f"Original: {value} -> Integer: {str_to_int(value)}")
+        print(f"Original: {value} -> Integer: {str_to_bilion(value)}")

@@ -2,7 +2,7 @@ import requests
 from lxml import html
 from bs4 import BeautifulSoup
 
-from util.converter import str_to_int
+from util.converter import str_to_bilion, str_to_float
 
 # XPathで値を抽出するスクレイパークラス
 class KabuScraper:
@@ -29,7 +29,8 @@ class KabuScraper:
                 url = f"https://kabutan.jp/stock/?code={self.stock_code}"
                 xpath = '//*[@id="kobetsu_left"]/table[1]/tbody/tr[4]/td[1]'
                 td = self._get_data(url, xpath)[0]
-                result = td.text_content().strip()
+                raw_value = td.text_content().strip()
+                result = str_to_float(raw_value)
 
             elif target == '権利確定月':
                 url = f"https://minkabu.jp/stock/{self.stock_code}/dividend"
@@ -41,7 +42,8 @@ class KabuScraper:
                 url = f"https://kabutan.jp/stock/?code={self.stock_code}"
                 xpath = '//*[@id="kobetsu_right"]/div[3]/table[1]/tbody/tr[3]/td[5]'
                 td = self._get_data(url, xpath)[0]
-                result = td.text_content().strip()
+                raw_value = td.text_content().strip()
+                result = str_to_float(raw_value)
 
             elif target == '株主優待':
                 url = f"https://minkabu.jp/stock/{self.stock_code}/yutai"
@@ -53,7 +55,7 @@ class KabuScraper:
                 url = f"https://kabutan.jp/stock/?code={self.stock_code}"
                 soup = self._get_soup(url)
                 raw_value = soup.find(id='stockinfo_i3').find_all('table')[0].find_all('tbody')[0].find_all('tr')[1].find_all('td')[0].text
-                result = str_to_int(raw_value)
+                result = str_to_bilion(raw_value)
 
             else:
                 raise ValueError(f"モジュール'KabuScraper'に'{target}'の設定がありません。")
@@ -96,12 +98,10 @@ class KabuScraper:
 
 # 動作確認用
 if __name__ == "__main__":
-    scraper1 = KabuScraper(stock_code="4040")
-    scraper2 = KabuScraper(stock_code="4042")
+    scraper = KabuScraper(stock_code="4040")
     try:
-        result = scraper1.scrape('時価総額')
+        result = scraper.scrape('配当金(円／株)')
         print(result)
-        result = scraper2.scrape('時価総額')
-        print(result)
+        print(type(result))
     except ValueError as e:
         print(e)

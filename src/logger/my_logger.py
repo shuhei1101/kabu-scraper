@@ -35,7 +35,7 @@ class MyLogger:
 
         # コンソール出力の設定
         ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
+        ch.setLevel(logging.DEBUG)
         ch.setFormatter(formatter)
         self.logger.addHandler(ch)
 
