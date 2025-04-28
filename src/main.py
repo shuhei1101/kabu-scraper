@@ -33,13 +33,13 @@ async def main():
 
         handler = StockXlsxHandler(
             xlsx_path=xlsx_path,
-            key=config.STOCK_CODE_COLUMN,
+            key=config.ELXS_KEY,
         )
-        stock_codes = handler.get_key_data()
+        nos = handler.get_keys()
         tasks = [
-            process_stock_code(stock_code, handler)
-            for stock_code in stock_codes
-            if isinstance(stock_code, int)
+            process_row(no, handler)
+            for no in nos
+            if isinstance(no, float)
         ]
         await asyncio.gather(*tasks)
 
@@ -57,21 +57,21 @@ async def main():
 
     print("\n" * 3)
 
-async def process_stock_code(stock_code, handler: StockXlsxHandler):
+async def process_row(no, handler: StockXlsxHandler):
     """銘柄コードを非同期で処理"""
     try:
-        record = handler.get_record(key=stock_code)
+        record = handler.get_record(key=no)
 
-        is_update = record["更新"] != None
+        is_update = record["更新"] == "◯"
         if not is_update:   
-            MyLogger().debug(f"銘柄コード '{stock_code}' は更新不要なため、スキップします。")
+            MyLogger().debug(f"No '{no}' は更新不要なため、スキップします。")
             return
         else:
-            MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングを開始します。")
+            MyLogger().debug(f"No '{no}' のスクレイピングを開始します。")
 
-        scraper = KabuScraper(stock_code)
+        scraper = KabuScraper(record["銘柄コード"])
 
-        tasks = [process_column(column, stock_code, scraper) for column in record.index]
+        tasks = [process_column(column, record["銘柄コード"], scraper) for column in record.index]
         results = await asyncio.gather(*tasks)
 
         for column, value in results:
@@ -79,7 +79,7 @@ async def process_stock_code(stock_code, handler: StockXlsxHandler):
                 record[column] = value
         
         handler.update_record(record)
-        MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングが完了しました。")
+        MyLogger().debug(f"銘柄コード '{no}' のスクレイピングが完了しました。")
     except Exception:
         MyLogger().info(f"不明なエラーが発生しました。")
         exc_type, exc_value, exc_tb = sys.exc_info()

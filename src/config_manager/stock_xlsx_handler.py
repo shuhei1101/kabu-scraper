@@ -25,7 +25,7 @@ class StockXlsxHandler:
         record = record.where(pd.notnull(record), None)
         return record
 
-    def get_key_data(self):
+    def get_keys(self):
         '''キーのデータを取得'''
         return self.df[self.key].tolist()
 
@@ -51,7 +51,7 @@ class StockXlsxHandler:
         # 該当行を探して更新
         for row in ws.iter_rows(min_row=2):
             cell = row[key_col_idx - 1]
-            if str(cell.value) == str(updated_record[self.key]):
+            if cell.value == updated_record[self.key]:
                 for idx, header in enumerate(headers):
                     if header in updated_record:
                         target_cell = row[idx]
@@ -69,14 +69,14 @@ class StockXlsxHandler:
 # 動作確認用
 if __name__ == "__main__":
     handler = StockXlsxHandler(
-        xlsx_path='input/配当管理.xlsx',
-        key='銘柄コード'
+        xlsx_path='/Users/nishikawashuhei/Downloads/配当管理.xlsx',
+        key='No'
     )
     try:
-        record = handler.get_record('2801')
+        record = handler.get_record('1.0')
         print("取得したレコード:", record)
 
-        stock_codes = handler.get_key_data()
+        stock_codes = handler.get_keys()
         print("銘柄コードのリスト:", stock_codes)
 
         # 更新するレコードの例
