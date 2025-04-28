@@ -42,7 +42,7 @@ async def main():
         ]
         await asyncio.gather(*tasks)
 
-        MyLogger().info("KabuScraper の実行が完了")
+        
         
 
     except Exception as e:
@@ -51,9 +51,13 @@ async def main():
         MyLogger().critical(traceback_to_json(exc_type, exc_value, exc_tb))
     
     finally:
+        print("\n" * 3)
+        MyLogger().info("KabuScraper の実行が完了")
         end_time = time.time()  # 終了時刻を記録
         elapsed_time = end_time - start_time
-        MyLogger().info(f"処理時間: {elapsed_time:.2f} 秒")  # 実行時間をログに記録
+        MyLogger().info(f"合計処理時間: {elapsed_time:.2f} 秒")
+        MyLogger().info(f"処理行数: {len(stock_codes)}")
+        MyLogger().info(f"平均処理時間: {elapsed_time / len(stock_codes):.2f} 秒")
 
     print("\n" * 3)
 
