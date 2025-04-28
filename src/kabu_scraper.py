@@ -40,8 +40,9 @@ class KabuScraper:
 
             elif target == '配当金(円／株)':
                 url = f"https://minkabu.jp/stock/{self.stock_code}/dividend"
-                xpath = '//*[@id="dps_detail"]/div[2]/div/div[6]/table[2]/tbody/tr[1]/td[4]'
-                raw_value = self._get_data(url, xpath)[0].text_content().strip()
+                soup = self._get_soup(url)
+                # xpath = '//*[@id="dps_detail"]/div[2]/div/div[6]/table[2]/tbody/tr[1]/td[4]'
+                raw_value = soup.find(id='dps_detail').find_all('table')[1].find_all('tbody')[0].find_all('tr')[0].find_all('td')[-1].text
                 result = str_to_float(raw_value)
 
             elif target == '株主優待':
@@ -97,7 +98,8 @@ class KabuScraper:
 
 # 動作確認用
 if __name__ == "__main__":
-    scraper = KabuScraper(stock_code="4063")
+    scraper = KabuScraper(stock_code="7267")
+    scraper = KabuScraper(stock_code="7261")
     try:
         result = scraper.scrape('配当金(円／株)')
         print(result)
