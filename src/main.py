@@ -25,7 +25,7 @@ async def main():
             print("処理を終了します。")
             return
 
-        print(f"選択されたファイル: {xlsx_path}")
+        MyLogger().info(f"選択されたファイル: {xlsx_path}")
         
 
         handler = StockXlsxHandler(
@@ -38,52 +38,63 @@ async def main():
             process_stock_code(stock_code, handler)
             for stock_code in stock_codes
         ]
-        print(f"スクレイピング中...")
         await asyncio.gather(*tasks)
 
         MyLogger().info("KabuScraper の実行が完了")
         
 
     except Exception as e:
-        print(f"不明なエラーが発生しました。処理を終了します。")
+        MyLogger().info(f"不明なエラーが発生しました。処理を終了します。")
         exc_type, exc_value, exc_tb = sys.exc_info()
         MyLogger().critical(traceback_to_json(exc_type, exc_value, exc_tb))
     
     print("\n" * 3)
 
-async def process_stock_code(stock_code, handler):
+async def process_stock_code(stock_code, handler: StockXlsxHandler):
     """銘柄コードを非同期で処理"""
-    scraper = KabuScraper(stock_code)
     record = handler.get_record(key=stock_code)
 
-    async def process_column(column):
-        try:
-            value = await asyncio.to_thread(scraper.scrape, column)
-        except ValueError as e:
-            MyLogger().debug(e)
-            return column, None
-        except Exception as e:
-            MyLogger().debug(f"'{stock_code}' の '{column}' のスクレイピングに失敗しました。空白で初期化します。")
-            return column, ""
+    is_update = record["更新不要"] == ""
+    if not is_update:
+        MyLogger().debug(f"銘柄コード '{stock_code}' は更新不要なため、スキップします。")
+        return
+    else:
+        MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングを開始します。")
 
-        if value is None:
-            MyLogger().debug(f"取得した値が None です。スキップします。")
-            return column, None
+    scraper = KabuScraper(stock_code)
 
-        MyLogger().debug(f"銘柄コード'{stock_code}' の '{column}' を '{value}' に更新しました。")
-        return column, value
-
-    tasks = [process_column(column) for column in record.index]
+    tasks = [process_column(column, stock_code, scraper) for column in record.index]
     results = await asyncio.gather(*tasks)
 
     for column, value in results:
         if value is not None:
             record[column] = value
+    
+    MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングが完了しました。")
 
     try:
         handler.update_record(record)
     except ValueError as e:
         MyLogger().debug(e)
+
+async def process_column(column, stock_code, scraper: KabuScraper):
+    """銘柄コードの各列を非同期で処理"""
+    try:
+        MyLogger().debug(f"銘柄コード '{stock_code}' の '{column}' をスクレイピング中...")
+        value = await asyncio.to_thread(scraper.scrape, column)
+    except ValueError as e:
+        MyLogger().debug(e)
+        return column, None
+    except Exception as e:
+        MyLogger().debug(f"'{stock_code}' の '{column}' のスクレイピングに失敗しました。空白で初期化します。")
+        return column, ""
+
+    if value is None:
+        MyLogger().debug(f"取得した値が None です。スキップします。")
+        return column, None
+
+    MyLogger().debug(f"銘柄コード'{stock_code}' の '{column}' を '{value}' に更新しました。")
+    return column, value
 
 def traceback_to_json(exc_type, exc_value, exc_tb):
     """スタックトレースをjson形式に変換する"""

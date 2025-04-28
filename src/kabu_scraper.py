@@ -2,12 +2,17 @@ import requests
 from lxml import html
 from bs4 import BeautifulSoup
 
+from util.converter import str_to_bilion, str_to_float
+
 # XPathで値を抽出するスクレイパークラス
 class KabuScraper:
+    cache = {}  # URLとレスポンスをキャッシュする辞書
 
     def __init__(self, stock_code):
         self.stock_code = stock_code
-        self.cache = {}  # URLとレスポンスをキャッシュする辞書
+        self._register_cache(f"https://kabutan.jp/stock/?code={self.stock_code}")
+        self._register_cache(f"https://minkabu.jp/stock/{self.stock_code}/dividend")
+        self._register_cache(f"https://minkabu.jp/stock/{self.stock_code}/yutai")
 
     def scrape(self, target):
         """対象を指定して値を取得"""
@@ -24,7 +29,8 @@ class KabuScraper:
                 url = f"https://kabutan.jp/stock/?code={self.stock_code}"
                 xpath = '//*[@id="kobetsu_left"]/table[1]/tbody/tr[4]/td[1]'
                 td = self._get_data(url, xpath)[0]
-                result = td.text_content().strip()
+                raw_value = td.text_content().strip()
+                result = str_to_float(raw_value)
 
             elif target == '権利確定月':
                 url = f"https://minkabu.jp/stock/{self.stock_code}/dividend"
@@ -36,7 +42,8 @@ class KabuScraper:
                 url = f"https://kabutan.jp/stock/?code={self.stock_code}"
                 xpath = '//*[@id="kobetsu_right"]/div[3]/table[1]/tbody/tr[3]/td[5]'
                 td = self._get_data(url, xpath)[0]
-                result = td.text_content().strip()
+                raw_value = td.text_content().strip()
+                result = str_to_float(raw_value)
 
             elif target == '株主優待':
                 url = f"https://minkabu.jp/stock/{self.stock_code}/yutai"
@@ -47,7 +54,8 @@ class KabuScraper:
             elif target == '時価総額':
                 url = f"https://kabutan.jp/stock/?code={self.stock_code}"
                 soup = self._get_soup(url)
-                result = soup.find(id='stockinfo_i3').find_all('table')[0].find_all('tbody')[0].find_all('tr')[1].find_all('td')[0].text
+                raw_value = soup.find(id='stockinfo_i3').find_all('table')[0].find_all('tbody')[0].find_all('tr')[1].find_all('td')[0].text
+                result = str_to_bilion(raw_value)
 
             else:
                 raise ValueError(f"モジュール'KabuScraper'に'{target}'の設定がありません。")
@@ -70,21 +78,30 @@ class KabuScraper:
         return BeautifulSoup(response.content, 'html.parser')
     
     def _get_response(self, url):
-        """URLに対するレスポンスをキャッシュから取得または新規取得する"""
-        if url in self.cache:
-            return self.cache[url]
+        if url in KabuScraper.cache:
+            return KabuScraper.cache[url]
         response = requests.get(url)
         if response.status_code != 200:
-            raise ValueError(f"Failed to load page: {url}")
+            raise ValueError(f"URL '{url}' にアクセスできません。ステータスコード: {response.status_code}")
+        KabuScraper.cache[url] = response
         self.cache[url] = response
         return response
+    
+    def _register_cache(self, url):
+        """URLからレスポンスをキャッシュに登録する"""
+        if url not in KabuScraper.cache:
+            response = requests.get(url)
+            if response.status_code != 200:
+                raise ValueError(f"URL '{url}' にアクセスできません。ステータスコード: {response.status_code}")
+            KabuScraper.cache[url] = response
     
 
 # 動作確認用
 if __name__ == "__main__":
-    scraper = KabuScraper(stock_code="4042")
+    scraper = KabuScraper(stock_code="4040")
     try:
-        result = scraper.scrape('銘柄')
+        result = scraper.scrape('配当金(円／株)')
         print(result)
+        print(type(result))
     except ValueError as e:
         print(e)
