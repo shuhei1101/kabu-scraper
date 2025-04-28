@@ -14,6 +14,8 @@ from config_manager.stock_xlsx_handler import StockXlsxHandler
 from logger.my_logger import MyLogger
 from kabu_scraper import KabuScraper
 
+done_cnt = 0
+
 async def main():
     """メイン関数"""
     start_time = time.time()  # 開始時刻を記録
@@ -42,9 +44,6 @@ async def main():
         ]
         await asyncio.gather(*tasks)
 
-        
-        
-
     except Exception as e:
         MyLogger().info(f"不明なエラーが発生しました。処理を終了します。")
         exc_type, exc_value, exc_tb = sys.exc_info()
@@ -56,9 +55,9 @@ async def main():
         end_time = time.time()  # 終了時刻を記録
         elapsed_time = end_time - start_time
         print()
-        MyLogger().info(f"処理株数: {len(stock_codes)}")
+        MyLogger().info(f"処理株数: {done_cnt}")
         MyLogger().info(f"合計処理時間: {elapsed_time:.2f} 秒")
-        MyLogger().info(f"平均処理時間: {elapsed_time / len(stock_codes):.2f} 秒")
+        MyLogger().info(f"平均処理時間: {elapsed_time / done_cnt:.2f} 秒")
 
     print("\n" * 3)
 
@@ -71,6 +70,7 @@ async def process_stock_code(stock_code, handler: StockXlsxHandler):
         MyLogger().debug(f"銘柄コード '{stock_code}' は更新不要なため、スキップします。")
         return
     else:
+        done_cnt += 1
         MyLogger().debug(f"銘柄コード '{stock_code}' のスクレイピングを開始します。")
 
     scraper = KabuScraper(stock_code)
