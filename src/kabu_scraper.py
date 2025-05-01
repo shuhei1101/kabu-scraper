@@ -64,6 +64,10 @@ class KabuScraper:
                 raw_value = soup.find(id='stockinfo_i3').find_all('table')[0].find_all('tbody')[0].find_all('tr')[1].find_all('td')[0].text
                 result = str_to_bilion(raw_value)
 
+            elif target == 'URL':
+                url = f"https://minkabu.jp/stock/{self.stock_code}"
+                result = url
+
             else:
                 raise ValueError(f"モジュール'KabuScraper'に'{target}'の設定がありません。")
                 
