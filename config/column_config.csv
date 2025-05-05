@@ -1,0 +1,2 @@
+is_enable,column,url,xpath
+1,権利確定月,https://minkabu.jp/stock/{stock_code}/dividend,//*[@id="v-stock-summary-info"]/div/div/div/div/div[2]/a/div[1]/div[1]/div[2]/div[2]
