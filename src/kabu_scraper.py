@@ -65,7 +65,7 @@ class KabuScraper:
                 result = str_to_bilion(raw_value)
 
             elif target == 'URL':
-                url = f"https://minkabu.jp/stock/{self.stock_code}"
+                url = f'=HYPERLINK("https://minkabu.jp/stock/{self.stock_code}")'
                 result = url
 
             else:
@@ -111,7 +111,7 @@ class KabuScraper:
 if __name__ == "__main__":
     scraper = KabuScraper(stock_code="7261")
     try:
-        result = scraper.scrape('予想配当金(円／株)')
+        result = scraper.scrape('URL')
         print(result)
         print(type(result))
     except ValueError as e:

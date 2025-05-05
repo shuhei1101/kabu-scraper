@@ -1,5 +1,5 @@
 # Excelファイルのパス
-XLSX_PATH = ''
+XLSX_PATH = "/Users/nishikawashuhei/Downloads/配当管理.xlsx"
 
 # 銘柄コードのカラム名
-STOCK_CODE_COLUMN = '銘柄コード'
+ELXS_KEY = 'No'
