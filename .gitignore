@@ -2,4 +2,4 @@
 /log/*
 __pycache__/
 *.pyc
-config/*
+config/app_config.py
