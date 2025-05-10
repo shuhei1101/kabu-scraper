@@ -9,7 +9,7 @@ project_root = os.path.dirname(src_dir)
 config_dir = os.path.join(project_root, 'config')
 sys.path.append(config_dir)
 
-import config
+import app_config
 from config_manager.stock_xlsx_handler import StockXlsxHandler
 from logger.my_logger import MyLogger
 from kabu_scraper import KabuScraper
@@ -22,9 +22,9 @@ async def main():
         print("\n" * 3)
         MyLogger().info(f"KabuScraper を実行")
 
-        xlsx_path = config.XLSX_PATH
+        xlsx_path = app_config.XLSX_PATH
         if not os.path.exists(xlsx_path):
-            print(f"`{config.XLSX_PATH}`にファイルが存在しません。config/config.pyを確認してください。")
+            print(f"`{app_config.XLSX_PATH}`にファイルが存在しません。config/config.pyを確認してください。")
             print("処理を終了します。")
             return
 
@@ -33,7 +33,7 @@ async def main():
 
         handler = StockXlsxHandler(
             xlsx_path=xlsx_path,
-            key=config.ELXS_KEY,
+            key=app_config.ELXS_KEY,
         )
         nos = handler.get_keys()
         tasks = [
