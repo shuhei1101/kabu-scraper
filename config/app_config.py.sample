@@ -1,0 +1,5 @@
+# Excelファイルのパス
+XLSX_PATH = ""
+
+# 銘柄コードのカラム名
+ELXS_KEY = 'No'
