@@ -1,3 +1,4 @@
+-e .
 beautifulsoup4==4.13.4
 bs4==0.0.2
 certifi==2025.4.26
@@ -14,7 +15,8 @@ requests==2.32.3
 setuptools==79.0.1
 six==1.17.0
 soupsieve==2.7
--e .
 typing_extensions==4.13.2
 tzdata==2025.2
 urllib3==2.4.0
+dotenv==0.9.9 
+python-dotenv==1.1.0

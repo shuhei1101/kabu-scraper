@@ -3,3 +3,5 @@
 __pycache__/
 *.pyc
 config/app_config.py
+/tmp/*
+.env
