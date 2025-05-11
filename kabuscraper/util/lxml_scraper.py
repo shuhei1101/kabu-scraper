@@ -1,6 +1,7 @@
 import requests
 from lxml import html
 
+
 # XPathで値を抽出するスクレイパークラス
 class LxmlScraper:
     def __init__(self, url):
@@ -17,20 +18,21 @@ class LxmlScraper:
         else:
             value = result
         # 要素の場合はテキストに変換
-        if hasattr(value, 'text'):
+        if hasattr(value, "text"):
             value = value.text
         return value
-    
+
     def get_table(self, xpath):
         tables = self.tree.xpath(xpath)
         if not tables:
             return None
         table = tables[0]  # 最初のtableを対象
         rows = []
-        for tr in table.xpath('.//tr'):
-            row = [td.text_content().strip() for td in tr.xpath('.//th|.//td')]
+        for tr in table.xpath(".//tr"):
+            row = [td.text_content().strip() for td in tr.xpath(".//th|.//td")]
             rows.append(row)
         return rows
+
 
 if __name__ == "__main__":
     url = "https://minkabu.jp/stock/9022/dividend"

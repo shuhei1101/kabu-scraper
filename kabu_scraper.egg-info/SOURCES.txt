@@ -1,0 +1,9 @@
+setup.py
+kabu_scraper.egg-info/PKG-INFO
+kabu_scraper.egg-info/SOURCES.txt
+kabu_scraper.egg-info/dependency_links.txt
+kabu_scraper.egg-info/top_level.txt
+kabuscraper/__init__.py
+kabuscraper/column_service.py
+kabuscraper/kabu_scraper.py
+kabuscraper/main.py

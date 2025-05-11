@@ -1,5 +1,7 @@
 {
-    "python.analysis.extraPaths": [
-        "./config"
+    "cSpell.words": [
+        "bilion",
+        "Kabu",
+        "kabuscraper"
     ]
 }
